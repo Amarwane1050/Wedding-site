@@ -10,11 +10,17 @@ import budgetRoutes from './routes/budgetRoutes.js';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+app.use(cors()); // ✅ une seule fois
 app.use(express.json());
 
+// Routes
+app.use('/api/weddings', weddingRoutes);
 app.use('/api/guests', guestRoutes);
+app.use('/api/vendors', vendorRoutes);
+app.use('/api/budget', budgetRoutes);
 
+// Connexion à MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ Connecté à MongoDB');
@@ -23,8 +29,3 @@ mongoose.connect(process.env.MONGO_URI)
     });
   })
   .catch((err) => console.error('Erreur de connexion MongoDB:', err));
-
-  app.use('/api/weddings', weddingRoutes);
-  app.use('/api/guests', guestRoutes);
-  app.use('/api/vendors', vendorRoutes);
-  app.use('/api/budget', budgetRoutes);
