@@ -1,78 +1,94 @@
-Ce projet a pour but de permettre la gestion complète d’un mariage à travers une application web. L'utilisateur peut y gérer :
+# Projet Gestion Mariages
 
-Les mariages (noms des mariés, date…),
+## Instructions de lancement
 
-La liste des invités,
+### Backend
+- Installer les dépendances :  
+  ```bash
+  npm install
+Configurer les variables d’environnement dans un fichier .env à la racine du backend.
 
-Le budget, avec le suivi des montants et des paiements,
+Lancer le serveur :
 
-Les prestataires (vendors).
+bash
+Copier
+Modifier
+npm start
+ou, si vous utilisez nodemon :
 
-Chaque fonctionnalité est liée à un mariage spécifique.
+bash
+Copier
+Modifier
+nodemon
+Le serveur tourne par défaut sur le port indiqué dans .env (ex: 5000).
 
-🧰 Technologies utilisées
-Front-end : React.js
+Frontend
+Installer les dépendances :
 
-Back-end : Node.js avec Express
+bash
+Copier
+Modifier
+npm install
+Lancer l’application React :
 
-Base de données : MongoDB (MongoDB Atlas)
+bash
+Copier
+Modifier
+npm start
+Assurez-vous que le backend est bien lancé avant de démarrer le frontend.
 
-Outils de test d’API : Insomnia
+Structure du projet
+bash
+Copier
+Modifier
+/backend
+  /models         # Schémas Mongoose (Wedding, Task, User, etc.)
+  /routes         # Routes API Express
+  server.js       # Point d’entrée backend
 
-Gestion des routes front : React Router
+/frontend
+  /src
+    /components   # Composants React réutilisables (TaskForm, Navbar, etc.)
+    /pages        # Pages React (TaskList, WeddingForm, Login, etc.)
+    App.jsx       # Composant principal React
+Variables d’environnement requises
+Variable	Description	Exemple
+MONGO_URI	URL de connexion MongoDB	mongodb+srv://user:pass@cluster.mongodb.net/dbname
+JWT_SECRET	Clé secrète pour signer les tokens JWT	une_chaine_très_secrète
+PORT	Port sur lequel tourne le backend	5000
 
-📁 Architecture
-Côté Front-End (React)
-App.jsx : Composant principal qui contient la navigation et permet de sélectionner un mariage.
+Routes API disponibles
+Route	Méthode	Description	Exemple d’appel / Payload	Protection
+/api/account/register	POST	Inscription utilisateur	{ email, password }	Non
+/api/account/login	POST	Connexion utilisateur	{ email, password }	Non
+/api/weddings	GET	Récupérer la liste des mariages	Header : Authorization: Bearer <token>	Oui (JWT requis)
+/api/weddings	POST	Créer un nouveau mariage	{ brideName, groomName, date, location }	Oui (JWT requis)
+/api/tasks/:weddingId	GET	Récupérer tâches d’un mariage	Header : Authorization: Bearer <token>	Oui (JWT requis)
+/api/tasks	POST	Ajouter une tâche	{ weddingId, name, done }	Oui (JWT requis)
 
-GuestList.jsx : Affiche, ajoute, modifie et supprime les invités liés à un mariage.
+Note : Pour les routes protégées, le token JWT doit être envoyé dans l’en-tête HTTP Authorization sous la forme :
+Authorization: Bearer <votre_token>
 
-BudgetManager.jsx : Permet de gérer les budgets (titre, montant, payé ou non).
+Exemple d’ajout de tâche via l’API avec un token JWT
+http
+Copier
+Modifier
+POST http://localhost:5000/api/tasks
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
 
-VendorList.jsx, WeddingForm.jsx, etc.
+{
+  "weddingId": "643a1f4e9b7e0f3a3a4b2c5d",
+  "name": "Décorer la salle",
+  "done": false
+}
+Remarques
+Le token JWT est généré lors de la connexion (/api/account/login).
 
-Côté Back-End (Node.js / Express)
-models/Wedding.js : Schéma du mariage.
+Sans token ou avec un token invalide/expiré, les routes protégées renvoient une erreur 401.
 
-models/Guest.js : Schéma d’un invité avec un champ weddingId.
+Les IDs (weddingId, taskId) sont générés automatiquement par MongoDB.
 
-models/Budget.js : Schéma pour les budgets avec title, amount, isPaid et weddingId.
+Le frontend utilise React et récupère/affiche les données via ces API.
 
-routes/weddingRoutes.js, guestRoutes.js, budgetRoutes.js : Définissent les routes CRUD pour chaque ressource.
-
-
-📌 Gestion des Budgets
-Chaque budget est :
-
-associé à un mariage via un ID (weddingId),
-
-constitué d’un titre, d’un montant, et d’un statut "payé ou non" (isPaid),
-
-affiché dynamiquement en fonction du mariage sélectionné dans App.jsx.
-
-Exemple d’usage :
-L’utilisateur choisit un mariage dans le menu déroulant.
-
-Il peut ajouter un budget pour ce mariage (ex : "Location salle", 1500€, payé).
-
-La liste des budgets se met à jour automatiquement.
-
-Il peut modifier ou supprimer chaque ligne.
-
-🔄 Fonctionnement React ↔ Express ↔ MongoDB
-Le composant BudgetManager.jsx récupère le weddingId du mariage sélectionné.
-
-Lors de l’ajout ou la modification, les données sont envoyées à l’API via Axios.
-
-L’API Express traite les requêtes et stocke les budgets dans MongoDB via Mongoose.
-
-Les budgets sont rechargés automatiquement après chaque action.
-
-✅ Résultat
-Ajout depuis React fonctionne parfaitement
-
-Stockage vérifié dans MongoDB Compass
-
-Affichage dynamique des budgets
-
-Lien fort entre chaque budget et son mariage
+La gestion des erreurs est faite côté frontend pour afficher les messages à l’utilisateur.
