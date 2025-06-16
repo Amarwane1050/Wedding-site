@@ -3,58 +3,50 @@ import Wedding from '../models/Wedding.js';
 
 const router = express.Router();
 
-// GET - Tous les mariages
+// GET tous les mariages
 router.get('/', async (req, res) => {
   try {
     const weddings = await Wedding.find();
     res.json(weddings);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
-// POST - Créer un mariage
+// POST créer un mariage
 router.post('/', async (req, res) => {
   try {
-    const { name, date, location } = req.body;
-    const wedding = new Wedding({ name, date, location });
-    await wedding.save();
-    res.status(201).json(wedding);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+    const { brideName, groomName, date, location } = req.body;
+    const newWedding = new Wedding({ brideName, groomName, date, location });
+    const savedWedding = await newWedding.save();
+    res.status(201).json(savedWedding);
+  } catch (err) {
+    res.status(400).json({ error: 'Erreur lors de la création' });
   }
 });
 
-// GET - Un mariage par ID
-router.get('/:id', async (req, res) => {
-  try {
-    const wedding = await Wedding.findById(req.params.id);
-    if (!wedding) return res.status(404).json({ message: 'Mariage non trouvé' });
-    res.json(wedding);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// PUT - Modifier un mariage
+// PUT modifier un mariage
 router.put('/:id', async (req, res) => {
   try {
-    const updatedWedding = await Wedding.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedWedding) return res.status(404).json({ message: 'Mariage non trouvé' });
+    const { brideName, groomName, date, location } = req.body;
+    const updatedWedding = await Wedding.findByIdAndUpdate(
+      req.params.id,
+      { brideName, groomName, date, location },
+      { new: true }
+    );
     res.json(updatedWedding);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+  } catch (err) {
+    res.status(400).json({ error: 'Erreur lors de la mise à jour' });
   }
 });
 
-// DELETE - Supprimer un mariage
+// DELETE supprimer un mariage
 router.delete('/:id', async (req, res) => {
   try {
-    const deletedWedding = await Wedding.findByIdAndDelete(req.params.id);
-    if (!deletedWedding) return res.status(404).json({ message: 'Mariage non trouvé' });
-    res.json({ message: 'Mariage supprimé avec succès' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    await Wedding.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Mariage supprimé' });
+  } catch (err) {
+    res.status(400).json({ error: 'Erreur lors de la suppression' });
   }
 });
 

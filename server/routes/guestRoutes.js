@@ -3,21 +3,21 @@ import Guest from '../models/Guest.js';
 
 const router = express.Router();
 
-// 🔹 GET - Lire tous les invités
-router.get('/', async (req, res) => {
+// GET guests by weddingId
+router.get('/wedding/:weddingId', async (req, res) => {
   try {
-    const guests = await Guest.find();
+    const guests = await Guest.find({ weddingId: req.params.weddingId });
     res.json(guests);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// 🔹 POST - Créer un invité
+// POST guest with weddingId
 router.post('/', async (req, res) => {
   try {
-    const { name, rsvp, status } = req.body;
-    const guest = new Guest({ name, rsvp, status });
+    const { name, rsvp, status, weddingId } = req.body;
+    const guest = new Guest({ name, rsvp, status, weddingId });
     await guest.save();
     res.status(201).json(guest);
   } catch (error) {
@@ -25,41 +25,31 @@ router.post('/', async (req, res) => {
   }
 });
 
-// 🔹 GET - Lire un invité par ID
-router.get('/:id', async (req, res) => {
-  try {
-    const guest = await Guest.findById(req.params.id);
-    if (!guest) return res.status(404).json({ message: 'Invité non trouvé' });
-    res.json(guest);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// 🔹 PUT - Modifier un invité
+// PUT
 router.put('/:id', async (req, res) => {
   try {
-    const updatedGuest = await Guest.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    if (!updatedGuest) return res.status(404).json({ message: 'Invité non trouvé' });
+    const updatedGuest = await Guest.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(updatedGuest);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
 
-// 🔹 DELETE - Supprimer un invité
+// DELETE
 router.delete('/:id', async (req, res) => {
   try {
-    const deletedGuest = await Guest.findByIdAndDelete(req.params.id);
-    if (!deletedGuest) return res.status(404).json({ message: 'Invité non trouvé' });
-    res.json({ message: 'Invité supprimé avec succès' });
+    await Guest.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Guest deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
 export default router;
+
+
+
+
+
 
 
